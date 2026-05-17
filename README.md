@@ -105,6 +105,16 @@ Built in phases.
   create/list/get/equity/report/trades.csv/cancel
 - Frontend `/backtest` page (create, list, metrics + Monte Carlo grids)
 
+**Phase 9 (Remaining Strategies)** — complete:
+
+- Added indicators: Wilder RSI, Bollinger Bands, Donchian channel
+- Six fully-implemented strategies, each with Pydantic params and
+  optimization ranges: RSI Mean Reversion (trend-filtered), Bollinger
+  Squeeze Breakout, Donchian Breakout, Grid (auto-range), DCA (with
+  optional dip-buying), Funding-Rate Arbitrage
+- All registered; immediately usable in paper/backtest/live and exposed
+  via the strategy-templates endpoint (no UI changes needed)
+
 ## Quick Start
 
 ```bash
