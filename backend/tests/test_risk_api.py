@@ -72,6 +72,40 @@ def test_kill_switch_trip_and_clear(client):
     assert events[0]["resolved_at"] is not None
 
 
+def test_trip_clears_paper_positions(client):
+    _use_fake_kill_switch()
+    headers = _auth(client)
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+
+    from app.db.models import Position
+
+    engine = create_engine(f"sqlite:///{client.app.state.test_db_path}")
+    with Session(engine) as s:
+        s.add(
+            Position(
+                user_id=1,
+                symbol="BTC/USDT",
+                side="buy",
+                qty=1.0,
+                avg_entry=100.0,
+                is_paper=True,
+            )
+        )
+        s.commit()
+    engine.dispose()
+
+    assert len(client.get("/api/v1/positions", headers=headers).json()) == 1
+    assert (
+        client.post(
+            "/api/v1/risk/kill-switch", json={"reason": "panic"}, headers=headers
+        ).status_code
+        == 200
+    )
+    assert client.get("/api/v1/positions", headers=headers).json() == []
+
+
 def test_risk_endpoints_require_auth(client):
     assert client.get("/api/v1/risk/rules").status_code == 401
     assert client.post("/api/v1/risk/kill-switch", json={}).status_code == 401

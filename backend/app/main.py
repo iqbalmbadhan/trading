@@ -6,7 +6,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
-from app.api import auth, exchanges, health, markets, risk, strategies
+from app.api import (
+    account,
+    auth,
+    exchanges,
+    health,
+    markets,
+    orders,
+    risk,
+    strategies,
+)
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
 
@@ -40,6 +49,8 @@ def create_app() -> FastAPI:
     app.include_router(markets.router)
     app.include_router(strategies.router)
     app.include_router(risk.router)
+    app.include_router(orders.router)
+    app.include_router(account.router)
     return app
 
 

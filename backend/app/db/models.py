@@ -29,6 +29,8 @@ class User(Base):
     totp_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     role: Mapped[str] = mapped_column(String(32), default="user", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    live_trading_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    live_enabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -158,3 +160,74 @@ class KillSwitchEvent(Base):
     )
     reason: Mapped[str] = mapped_column(String(256), nullable=False)
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    exchange_account_id: Mapped[int | None] = mapped_column(
+        ForeignKey("exchange_accounts.id", ondelete="SET NULL"), nullable=True
+    )
+    strategy_id: Mapped[int | None] = mapped_column(
+        ForeignKey("strategies.id", ondelete="SET NULL"), nullable=True
+    )
+    client_order_id: Mapped[str] = mapped_column(
+        String(64), unique=True, index=True, nullable=False
+    )
+    exchange_order_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    symbol: Mapped[str] = mapped_column(String(64), nullable=False)
+    side: Mapped[str] = mapped_column(String(8), nullable=False)
+    type: Mapped[str] = mapped_column(String(8), nullable=False)
+    qty: Mapped[float] = mapped_column(Float, nullable=False)
+    price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="submitting", nullable=False)
+    filled_qty: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    avg_fill: Mapped[float | None] = mapped_column(Float, nullable=True)
+    fees: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    slippage_bps: Mapped[float | None] = mapped_column(Float, nullable=True)
+    is_paper: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class Trade(Base):
+    __tablename__ = "trades"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    ts: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    qty: Mapped[float] = mapped_column(Float, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    fee: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    pnl: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+
+
+class Position(Base):
+    __tablename__ = "positions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    exchange_account_id: Mapped[int | None] = mapped_column(
+        ForeignKey("exchange_accounts.id", ondelete="SET NULL"), nullable=True
+    )
+    symbol: Mapped[str] = mapped_column(String(64), nullable=False)
+    side: Mapped[str] = mapped_column(String(8), nullable=False)
+    qty: Mapped[float] = mapped_column(Float, nullable=False)
+    avg_entry: Mapped[float] = mapped_column(Float, nullable=False)
+    unrealized_pnl: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    is_paper: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    opened_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

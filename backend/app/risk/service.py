@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import KillSwitchEvent, RiskRule, Strategy, StrategyRun
+from app.db.models import KillSwitchEvent, Position, RiskRule, Strategy, StrategyRun
 from app.risk.config import RiskConfig
 from app.risk.kill_switch import KillSwitch
 from app.strategies.stop import RedisStopController
@@ -64,8 +64,27 @@ async def trip_kill_switch(
     for strategy in strategies.scalars().all():
         strategy.is_active = False
 
+    # Flatten positions: simulated paper positions are cleared directly;
+    # live positions are liquidated on-exchange by a worker per account.
+    positions = (
+        (await db.execute(select(Position).where(Position.user_id == user_id))).scalars().all()
+    )
+    live_symbols_by_account: dict[int, list[str]] = {}
+    for pos in positions:
+        if pos.is_paper:
+            await db.delete(pos)
+        elif pos.exchange_account_id is not None:
+            live_symbols_by_account.setdefault(pos.exchange_account_id, []).append(pos.symbol)
+
     await db.commit()
     await db.refresh(event)
+
+    if live_symbols_by_account:
+        from app.workers.tasks import liquidate_account_task
+
+        for account_id, symbols in live_symbols_by_account.items():
+            liquidate_account_task.delay(account_id, symbols)
+
     return event
 
 

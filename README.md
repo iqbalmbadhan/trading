@@ -77,6 +77,20 @@ Built in phases.
   CRUD + kill-switch trip/clear/status/events API
 - Frontend `/risk` page (rules, blacklist, kill switch + history)
 
+**Phase 7 (Order Execution — Live)** — complete:
+
+- `LiveOrderRouter`: risk + kill-switch gate, client-UUID idempotency
+  (persist before send, recover instead of resend on lost ack), safe
+  exponential-backoff retries, slippage measurement/alerting, position
+  and trade bookkeeping
+- Locally-simulated bracket/OCO (`Bracket`), kill-switch liquidation
+  (`liquidate` + per-account Celery task; trip clears paper positions and
+  flattens live ones)
+- `orders`/`trades`/`positions` tables + user live flags + migration
+  `0006`; orders/positions API and two-step live enablement (typed phrase)
+- Frontend `/orders` page (manual order, positions, orders table with
+  slippage/fees, live-enable panel)
+
 ## Quick Start
 
 ```bash
