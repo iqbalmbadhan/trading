@@ -115,6 +115,18 @@ Built in phases.
 - All registered; immediately usable in paper/backtest/live and exposed
   via the strategy-templates endpoint (no UI changes needed)
 
+**Phase 10 (Portfolio & Analytics)** — complete:
+
+- USD-normalized holdings valuation (long/short delta), per-symbol
+  allocation and exposure-by-asset; pure correlation matrix from candle
+  returns
+- Portfolio API: summary / allocation / correlation (injectable price
+  provider)
+- Analytics aggregated from finished backtests: overall metrics, per-
+  strategy comparison, equity + drawdown curve API
+- Frontend `/portfolio` (holdings, exposure, correlation heatmap) and
+  `/analytics` (metric cards, per-strategy comparison) pages
+
 ## Quick Start
 
 ```bash

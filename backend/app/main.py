@@ -8,12 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import __version__
 from app.api import (
     account,
+    analytics,
     auth,
     backtests,
     exchanges,
     health,
     markets,
     orders,
+    portfolio,
     risk,
     strategies,
 )
@@ -53,6 +55,8 @@ def create_app() -> FastAPI:
     app.include_router(orders.router)
     app.include_router(account.router)
     app.include_router(backtests.router)
+    app.include_router(portfolio.router)
+    app.include_router(analytics.router)
     return app
 
 
