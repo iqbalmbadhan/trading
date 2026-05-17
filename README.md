@@ -9,13 +9,23 @@ Docker Compose with zero cloud dependency.
 
 ## Status
 
-Built in phases. **Phase 1 (Foundation)** is complete:
+Built in phases.
+
+**Phase 1 (Foundation)** — complete:
 
 - Repository scaffold (`backend/`, `frontend/`, infra)
 - Docker Compose: PostgreSQL/TimescaleDB, Redis, backend, frontend
 - FastAPI backend with `/health` and `/api/v1/system/version`
-- Next.js 14 frontend (App Router + TypeScript + Tailwind) rendering a landing page
+- Next.js 14 frontend (App Router + TypeScript + Tailwind)
 - CI: lint + format + tests for backend and frontend
+
+**Phase 2 (Auth & Users)** — complete:
+
+- `User` model + Alembic migration (migrations run on backend startup)
+- Argon2id password hashing, JWT access (15m) + rotating refresh tokens
+- TOTP 2FA: setup, verify, enforced at login once enabled
+- Auth API: `register`, `login`, `refresh`, `logout`, `me`, `2fa-setup`, `2fa-verify`
+- Frontend: `/login` page and auth-guarded home view
 
 ## Quick Start
 
