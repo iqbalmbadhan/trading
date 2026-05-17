@@ -27,6 +27,18 @@ Built in phases.
 - Auth API: `register`, `login`, `refresh`, `logout`, `me`, `2fa-setup`, `2fa-verify`
 - Frontend: `/login` page and auth-guarded home view
 
+**Phase 3 (Exchange Connectors)** — complete:
+
+- `BaseExchange` interface; CCXT-backed adapter; paper adapter with
+  configurable slippage/latency and live-price fills
+- Envelope encryption (per-secret data key wrapped by master-key KEK);
+  plaintext keys never persisted or logged
+- Permission verifier rejects keys with withdrawal scope (fails closed)
+- Per-exchange token-bucket rate limiter
+- `exchange_accounts` table + migration; API: list / connect / test /
+  verify-permissions / disconnect
+- Frontend `/exchanges` page with trade-only warning and connect flow
+
 ## Quick Start
 
 ```bash
