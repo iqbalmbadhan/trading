@@ -160,6 +160,15 @@ Built in phases.
   `/api/v1/audit/decisions/{run}` (ownership-checked); migration `0009`
 - Frontend `/logs` page (filterable audit + per-run decisions)
 
+**Phase 14 (Mobile PWA Polish)** — complete:
+
+- `@ducanh2912/next-pwa` integration (service worker, runtime caching,
+  disabled in dev), web app manifest + SVG icon, theme/viewport metadata,
+  installable + offline-capable
+- Shared responsive `AppShell` (sticky nav, desktop row + mobile
+  hamburger menu, sign-out) injected via `RequireAuth` so every
+  authenticated page gets consistent mobile-friendly navigation
+
 ## Quick Start
 
 ```bash

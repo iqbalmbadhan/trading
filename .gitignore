@@ -20,6 +20,14 @@ node_modules/
 out/
 npm-debug.log*
 
+# next-pwa generated service worker
+frontend/public/sw.js
+frontend/public/sw.js.map
+frontend/public/workbox-*.js
+frontend/public/workbox-*.js.map
+frontend/public/swe-worker-*.js
+frontend/public/fallback-*.js
+
 # OS / editor
 .DS_Store
 .idea/

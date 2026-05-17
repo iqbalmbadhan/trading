@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AppShell } from "@/components/AppShell";
 import { apiFetch, clearTokens, getAccessToken } from "@/lib/api";
 
 export type CurrentUser = {
@@ -39,5 +40,5 @@ export function RequireAuth({
       </main>
     );
   }
-  return <>{children(user)}</>;
+  return <AppShell>{children(user)}</AppShell>;
 }
