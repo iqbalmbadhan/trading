@@ -39,6 +39,17 @@ Built in phases.
   verify-permissions / disconnect
 - Frontend `/exchanges` page with trade-only warning and connect flow
 
+**Phase 4 (Market Data)** — complete:
+
+- `symbols` + `candles` tables; migration `0003` creates a TimescaleDB
+  hypertable and 1m→5m→15m→1h→4h→1d continuous aggregates on Postgres
+  (guarded so sqlite/test runs skip the Timescale-only DDL)
+- Historical `CandleFetcher`: gap detection, dedup, idempotent backfill
+- OHLCV normalizer (ms→s, dedup) and timeframe rollup logic
+- Live `BinanceKlineStream` with pure, unit-tested message parsing;
+  Redis pub/sub `MarketDataBus` for in-process consumers
+- Read API: `/api/v1/markets/symbols`, `/api/v1/markets/candles`
+
 ## Quick Start
 
 ```bash

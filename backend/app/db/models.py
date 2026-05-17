@@ -2,7 +2,16 @@
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -41,3 +50,32 @@ class ExchangeAccount(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class Symbol(Base):
+    __tablename__ = "symbols"
+    __table_args__ = (UniqueConstraint("exchange", "symbol", name="uq_symbols_exchange_symbol"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    exchange: Mapped[str] = mapped_column(String(64), nullable=False)
+    symbol: Mapped[str] = mapped_column(String(64), nullable=False)
+    base: Mapped[str] = mapped_column(String(32), nullable=False)
+    quote: Mapped[str] = mapped_column(String(32), nullable=False)
+    contract_type: Mapped[str] = mapped_column(String(16), default="spot", nullable=False)
+    min_qty: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    tick_size: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+
+
+class Candle(Base):
+    __tablename__ = "candles"
+
+    symbol_id: Mapped[int] = mapped_column(
+        ForeignKey("symbols.id", ondelete="CASCADE"), primary_key=True
+    )
+    timeframe: Mapped[str] = mapped_column(String(8), primary_key=True)
+    ts: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    o: Mapped[float] = mapped_column(Float, nullable=False)
+    h: Mapped[float] = mapped_column(Float, nullable=False)
+    l: Mapped[float] = mapped_column(Float, nullable=False)
+    c: Mapped[float] = mapped_column(Float, nullable=False)
+    v: Mapped[float] = mapped_column(Float, nullable=False)
