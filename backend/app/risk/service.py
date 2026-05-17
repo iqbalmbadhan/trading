@@ -84,6 +84,17 @@ async def trip_kill_switch(
 
     await dispatch_event(db, user_id, Event("kill_switch", {"reason": reason}))
 
+    from app.audit.service import record_audit
+
+    await record_audit(
+        db,
+        user_id=user_id,
+        actor="user",
+        action="kill_switch.trip",
+        target="kill_switch",
+        after={"reason": reason},
+    )
+
     if live_symbols_by_account:
         from app.workers.tasks import liquidate_account_task
 
@@ -105,6 +116,15 @@ async def clear_kill_switch(db: AsyncSession, user_id: int, kill_switch: KillSwi
     for event in result.scalars().all():
         event.resolved_at = now
     await db.commit()
+    from app.audit.service import record_audit
+
+    await record_audit(
+        db,
+        user_id=user_id,
+        actor="user",
+        action="kill_switch.clear",
+        target="kill_switch",
+    )
 
 
 async def list_kill_switch_events(db: AsyncSession, user_id: int) -> list[KillSwitchEvent]:

@@ -148,6 +148,18 @@ Built in phases.
 - API: `/api/v1/routing/quote` (across connected venues) and
   `/execute` (paper-only); frontend `/routing` page
 
+**Phase 13 (Audit & Decision Log)** — complete:
+
+- Append-only `audit_log` (deletes recorded as tombstones with prior
+  state) and per-run `decisions` (decision + indicators + reasoning)
+- `record_audit` (own-commit, never blocks the caller) wired into
+  strategy start/stop/delete, kill-switch trip/clear, live-trading
+  enable/disable, exchange connect/disconnect; `record_decision` written
+  for every strategy signal in `execute_run`
+- Read API: `/api/v1/audit` (action/target filter) and
+  `/api/v1/audit/decisions/{run}` (ownership-checked); migration `0009`
+- Frontend `/logs` page (filterable audit + per-run decisions)
+
 ## Quick Start
 
 ```bash

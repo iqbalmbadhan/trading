@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import record_audit
 from app.db.models import Strategy, StrategyRun
 from app.strategies.registry import build_strategy
 from app.strategies.stop import RedisStopController
@@ -78,8 +79,24 @@ async def update_strategy(
 async def delete_strategy(db: AsyncSession, strategy: Strategy) -> None:
     if strategy.is_active:
         raise StrategyError("Stop the strategy before deleting it")
+    snapshot = {
+        "id": strategy.id,
+        "name": strategy.name,
+        "type": strategy.type,
+        "params": strategy.params,
+    }
+    user_id = strategy.user_id
+    sid = strategy.id
     await db.delete(strategy)
     await db.commit()
+    await record_audit(
+        db,
+        user_id=user_id,
+        actor="user",
+        action="strategy.delete",
+        target=f"strategy:{sid}",
+        before=snapshot,
+    )
 
 
 async def clone_strategy(db: AsyncSession, strategy: Strategy) -> Strategy:
@@ -112,6 +129,14 @@ async def start_strategy(db: AsyncSession, strategy: Strategy) -> StrategyRun:
     from app.workers.tasks import run_strategy_run
 
     run_strategy_run.delay(run.id)
+    await record_audit(
+        db,
+        user_id=strategy.user_id,
+        actor="user",
+        action="strategy.start",
+        target=f"strategy:{strategy.id}",
+        after={"run_id": run.id},
+    )
     return run
 
 
@@ -127,3 +152,10 @@ async def stop_strategy(db: AsyncSession, strategy: Strategy) -> None:
         run.stopped_at = datetime.now(UTC)
     strategy.is_active = False
     await db.commit()
+    await record_audit(
+        db,
+        user_id=strategy.user_id,
+        actor="user",
+        action="strategy.stop",
+        target=f"strategy:{strategy.id}",
+    )

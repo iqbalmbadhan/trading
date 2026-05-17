@@ -297,3 +297,36 @@ class NotificationLog(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class AuditLog(Base):
+    """Append-only record of state changes. Deletions are tombstones here."""
+
+    __tablename__ = "audit_log"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    ts: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    actor: Mapped[str] = mapped_column(String(64), nullable=False)
+    action: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    target: Mapped[str] = mapped_column(String(128), index=True, nullable=False)
+    before: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    after: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+
+class Decision(Base):
+    __tablename__ = "decisions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    strategy_run_id: Mapped[int] = mapped_column(
+        ForeignKey("strategy_runs.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    ts: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    symbol: Mapped[str] = mapped_column(String(64), nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
+    reasoning: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    indicators: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)

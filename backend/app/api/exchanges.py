@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.audit.service import record_audit
 from app.db.models import ExchangeAccount, User
 from app.db.session import get_db
 from app.exchanges import service
@@ -63,6 +64,14 @@ async def connect_exchange(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     except ExchangeError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    await record_audit(
+        db,
+        user_id=user.id,
+        actor="user",
+        action="exchange.connect",
+        target=f"exchange_account:{account.id}",
+        after={"exchange": account.exchange, "label": account.label},
+    )
     return _to_out(account)
 
 
@@ -120,6 +129,15 @@ async def disconnect_exchange(
     account = await service.get_account(db, user.id, account_id)
     if account is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+    snapshot = {"exchange": account.exchange, "label": account.label}
     await db.delete(account)
     await db.commit()
+    await record_audit(
+        db,
+        user_id=user.id,
+        actor="user",
+        action="exchange.disconnect",
+        target=f"exchange_account:{account_id}",
+        before=snapshot,
+    )
     return None

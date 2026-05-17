@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.audit.service import record_audit
 from app.db.models import User
 from app.db.session import get_db
 
@@ -52,6 +53,14 @@ async def enable_live(
     user.live_enabled_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(user)
+    await record_audit(
+        db,
+        user_id=user.id,
+        actor="user",
+        action="live_trading.enable",
+        target=f"user:{user.id}",
+        after={"live_trading_enabled": True},
+    )
     return LiveStatus(
         live_trading_enabled=True,
         live_enabled_at=user.live_enabled_at.isoformat(),
@@ -65,4 +74,12 @@ async def disable_live(
 ) -> LiveStatus:
     user.live_trading_enabled = False
     await db.commit()
+    await record_audit(
+        db,
+        user_id=user.id,
+        actor="user",
+        action="live_trading.disable",
+        target=f"user:{user.id}",
+        after={"live_trading_enabled": False},
+    )
     return LiveStatus(live_trading_enabled=False, live_enabled_at=None)

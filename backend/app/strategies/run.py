@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
+from app.audit.service import record_decision
 from app.db.models import Signal as SignalRow
 from app.db.models import Strategy, StrategyRun
 from app.exchanges.base import BaseExchange
@@ -73,6 +74,18 @@ async def execute_run(
                     stop_price=sig.stop_price,
                     meta=sig.metadata,
                 )
+            )
+            await record_decision(
+                session,
+                strategy_run_id=run_id,
+                ts=sig.ts,
+                symbol=sig.symbol,
+                decision=str(sig.side),
+                reasoning={
+                    "executed": result.order is not None,
+                    "skipped_reason": result.skipped_reason,
+                },
+                indicators=sig.metadata,
             )
         run = await session.get(StrategyRun, run_id)
         run.status = status
