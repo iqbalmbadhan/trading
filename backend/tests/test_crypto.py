@@ -28,3 +28,29 @@ def test_wrong_master_key_cannot_decrypt(monkeypatch):
     monkeypatch.setattr(crypto, "get_settings", lambda: _Other())
     with pytest.raises(crypto.DecryptionError):
         crypto.decrypt_secret(enc.encrypted_dek, enc.ciphertext)
+
+
+def test_rewrap_dek_rotates_master_key(monkeypatch):
+    # Encrypt under the default (dev) master key.
+    enc = crypto.encrypt_secret("rotate-me")
+    old_key = crypto.get_settings().master_key
+    new_key = "brand-new-master-key-value"
+
+    new_dek = crypto.rewrap_dek(old_key, new_key, enc.encrypted_dek)
+    assert new_dek != enc.encrypted_dek
+
+    # The ciphertext is unchanged; decryption now works under the new key.
+    class _New:
+        master_key = new_key
+
+    monkeypatch.setattr(crypto, "get_settings", lambda: _New())
+    assert crypto.decrypt_secret(new_dek, enc.ciphertext) == "rotate-me"
+    # Old wrapped DEK no longer decrypts under the new key.
+    with pytest.raises(crypto.DecryptionError):
+        crypto.decrypt_secret(enc.encrypted_dek, enc.ciphertext)
+
+
+def test_rewrap_dek_rejects_wrong_old_key():
+    enc = crypto.encrypt_secret("x")
+    with pytest.raises(crypto.DecryptionError):
+        crypto.rewrap_dek("not-the-old-key", "new-key", enc.encrypted_dek)

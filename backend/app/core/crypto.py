@@ -19,15 +19,18 @@ class DecryptionError(Exception):
     """Raised when ciphertext cannot be decrypted with the current master key."""
 
 
-def _kek() -> Fernet:
-    master = get_settings().master_key.encode()
+def _kek_from(master: str) -> Fernet:
     derived = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
         salt=b"trading-bot-envelope-v1",
         info=b"key-encryption-key",
-    ).derive(master)
+    ).derive(master.encode())
     return Fernet(base64.urlsafe_b64encode(derived))
+
+
+def _kek() -> Fernet:
+    return _kek_from(get_settings().master_key)
 
 
 class EncryptedSecret:
@@ -53,3 +56,16 @@ def decrypt_secret(encrypted_dek: str, ciphertext: str) -> str:
         return Fernet(dek).decrypt(ciphertext.encode()).decode()
     except InvalidToken as exc:
         raise DecryptionError("Unable to decrypt secret with the current master key") from exc
+
+
+def rewrap_dek(old_master: str, new_master: str, encrypted_dek: str) -> str:
+    """Re-wrap a data key under a new master key (ciphertext is unchanged).
+
+    Used by the secret-rotation flow: only the small encrypted DEK is
+    re-encrypted, so rotating the master key never re-encrypts every secret.
+    """
+    try:
+        dek = _kek_from(old_master).decrypt(encrypted_dek.encode())
+    except InvalidToken as exc:
+        raise DecryptionError("encrypted DEK does not match the old master key") from exc
+    return _kek_from(new_master).encrypt(dek).decode()

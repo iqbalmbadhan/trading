@@ -182,16 +182,32 @@ Built in phases.
 Run monitoring: `docker compose --profile monitoring up -d` (Grafana on
 `:3001`, Prometheus on `:9090`).
 
+**Phase 16 (Hardening & Docs)** — complete:
+
+- `scripts/setup.sh` (generate secrets, migrate, create admin — idempotent),
+  `scripts/backup.sh` / `scripts/restore.sh` (one-command DB backup/restore)
+- Secret rotation: `rewrap_dek` re-wraps data keys under a new master key
+  with no plaintext exposure, driven by `app.scripts.rotate_master_key`;
+  `app.scripts.create_admin` management command
+- Docs: `docs/PENTEST_CHECKLIST.md`, `docs/OPERATIONS.md`,
+  `docs/USER_GUIDE.md`
+
+**All 16 phases complete.** Full suite green: backend 193 pytest, frontend
+lint/format/build.
+
 ## Quick Start
 
 ```bash
 git clone <repo>
 cd trading
-cp .env.example .env
+./scripts/setup.sh        # generates .env secrets, migrates, creates admin
 docker compose up -d
 # Backend:  http://localhost:8000/health
 # Frontend: http://localhost:3000
 ```
+
+See `docs/USER_GUIDE.md` for the end-to-end walkthrough and
+`docs/OPERATIONS.md` for backup/restore, monitoring, and secret rotation.
 
 ## Local Development
 
