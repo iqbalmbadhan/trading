@@ -32,6 +32,7 @@ dev = [
     "ruff>=0.4",
     "black>=24.4",
     "aiosqlite>=0.20",
+    "hypothesis>=6.100",
 ]
 
 [build-system]

@@ -1,7 +1,8 @@
-"""Minimal signal -> paper order executor.
+"""Signal -> paper order executor.
 
-Phase 5 only routes paper orders. Risk checks (Phase 6) and live routing
-with idempotency/retries (Phase 7) wrap this same interface later.
+The kill switch is consulted before every order: this executor is the
+single chokepoint, so a tripped switch blocks all order placement
+regardless of what strategies decide.
 """
 
 from __future__ import annotations
@@ -9,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.exchanges.base import BaseExchange, Order, OrderSide, OrderType
+from app.risk.kill_switch import KillSwitch
 from app.strategies.base import Signal, SignalSide
 
 
@@ -20,11 +22,19 @@ class ExecutionResult:
 
 
 class PaperExecutor:
-    def __init__(self, exchange: BaseExchange, default_qty: float = 1.0) -> None:
+    def __init__(
+        self,
+        exchange: BaseExchange,
+        default_qty: float = 1.0,
+        kill_switch: KillSwitch | None = None,
+    ) -> None:
         self._exchange = exchange
         self._default_qty = default_qty
+        self._kill_switch = kill_switch
 
     async def execute(self, signal: Signal) -> ExecutionResult:
+        if self._kill_switch is not None and self._kill_switch.is_active():
+            return ExecutionResult(signal=signal, order=None, skipped_reason="kill switch active")
         if signal.side is SignalSide.FLAT:
             return ExecutionResult(signal=signal, order=None, skipped_reason="flat signal")
         side = OrderSide.BUY if signal.side is SignalSide.BUY else OrderSide.SELL

@@ -132,3 +132,29 @@ class Signal(Base):
     confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
     stop_price: Mapped[float | None] = mapped_column(Float, nullable=True)
     meta: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+
+
+class RiskRule(Base):
+    __tablename__ = "risk_rules"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    rule_type: Mapped[str] = mapped_column(String(32), default="global", nullable=False)
+    params: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    is_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
+class KillSwitchEvent(Base):
+    __tablename__ = "kill_switch_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    triggered_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    reason: Mapped[str] = mapped_column(String(256), nullable=False)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

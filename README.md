@@ -62,6 +62,21 @@ Built in phases.
   worker** with a Redis-backed stop control; new `worker` compose service
 - Frontend `/strategies` page (templates, create, start/stop) — paper-only
 
+**Phase 6 (Risk Manager)** — complete:
+
+- All nine pre-trade checks (per-trade risk %, max position value, max
+  open positions, blacklist, strategy/account daily loss, max drawdown,
+  correlation, mandatory stop-loss) via a `RiskManager` returning an
+  auditable decision
+- Position sizing: fixed-fractional, ATR volatility-adjusted, fractional
+  Kelly hard-capped at 0.25x full Kelly
+- Global kill switch (single `KILL_SWITCH` Redis flag) enforced in the
+  executor chokepoint; tripping disables all of a user's strategies and
+  logs an event
+- `risk_rules`/`kill_switch_events` tables + migration `0005`; risk rules
+  CRUD + kill-switch trip/clear/status/events API
+- Frontend `/risk` page (rules, blacklist, kill switch + history)
+
 ## Quick Start
 
 ```bash
