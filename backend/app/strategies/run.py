@@ -87,6 +87,10 @@ async def execute_run(
                 },
                 indicators=sig.metadata,
             )
+        if results:
+            from app.core.metrics import SIGNALS_RECORDED
+
+            SIGNALS_RECORDED.inc(len(results))
         run = await session.get(StrategyRun, run_id)
         run.status = status
         run.error = error

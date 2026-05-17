@@ -217,4 +217,7 @@ class LiveOrderRouter:
 
         await self._db.commit()
         await self._db.refresh(row)
+        from app.core.metrics import ORDERS_PLACED
+
+        ORDERS_PLACED.labels("paper" if req.is_paper else "live").inc()
         return row

@@ -129,6 +129,9 @@ async def start_strategy(db: AsyncSession, strategy: Strategy) -> StrategyRun:
     from app.workers.tasks import run_strategy_run
 
     run_strategy_run.delay(run.id)
+    from app.core.metrics import STRATEGY_STARTS
+
+    STRATEGY_STARTS.inc()
     await record_audit(
         db,
         user_id=strategy.user_id,

@@ -45,6 +45,9 @@ async def trip_kill_switch(
 ) -> KillSwitchEvent:
     """Trip the global switch, log it, and disable the user's strategies."""
     kill_switch.trip(reason)
+    from app.core.metrics import KILL_SWITCH_TRIPS
+
+    KILL_SWITCH_TRIPS.inc()
     event = KillSwitchEvent(user_id=user_id, reason=reason)
     db.add(event)
 

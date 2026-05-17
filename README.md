@@ -169,6 +169,19 @@ Built in phases.
   hamburger menu, sign-out) injected via `RequireAuth` so every
   authenticated page gets consistent mobile-friendly navigation
 
+**Phase 15 (Observability)** — complete:
+
+- Prometheus `/metrics` endpoint: HTTP request count + latency histogram
+  (labelled by method/route/status) plus domain counters (orders placed,
+  signals recorded, kill-switch trips, strategy starts) wired at their
+  call sites
+- `--profile monitoring` Compose services: Prometheus (scrapes backend),
+  Loki + Promtail (container log shipping), Grafana with provisioned
+  datasources and a starter dashboard
+
+Run monitoring: `docker compose --profile monitoring up -d` (Grafana on
+`:3001`, Prometheus on `:9090`).
+
 ## Quick Start
 
 ```bash
