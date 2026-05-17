@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import __version__
 from app.api import (
     account,
+    alerts,
     analytics,
     auth,
     backtests,
@@ -57,6 +58,7 @@ def create_app() -> FastAPI:
     app.include_router(backtests.router)
     app.include_router(portfolio.router)
     app.include_router(analytics.router)
+    app.include_router(alerts.router)
     return app
 
 

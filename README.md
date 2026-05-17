@@ -127,6 +127,17 @@ Built in phases.
 - Frontend `/portfolio` (holdings, exposure, correlation heatmap) and
   `/analytics` (metric cards, per-strategy comparison) pages
 
+**Phase 11 (Alerts)** — complete:
+
+- Channels: Telegram, webhook (Discord/Slack), email (SMTP) — network/
+  SMTP behind injectable helpers
+- Rule engine with event types (new_fill, strategy_stopped, kill_switch,
+  daily_pnl, position_drawdown) + threshold matching + message formatting
+- `notifications`/`notification_log` tables + migration `0008`; best-
+  effort dispatch (failures logged, never break trading); kill-switch
+  trip emits an alert
+- Alerts API: CRUD, test send, delivery history; frontend `/alerts` page
+
 ## Quick Start
 
 ```bash

@@ -79,6 +79,11 @@ async def trip_kill_switch(
     await db.commit()
     await db.refresh(event)
 
+    from app.alerts.rules import Event
+    from app.alerts.service import dispatch_event
+
+    await dispatch_event(db, user_id, Event("kill_switch", {"reason": reason}))
+
     if live_symbols_by_account:
         from app.workers.tasks import liquidate_account_task
 
