@@ -50,6 +50,18 @@ Built in phases.
   Redis pub/sub `MarketDataBus` for in-process consumers
 - Read API: `/api/v1/markets/symbols`, `/api/v1/markets/candles`
 
+**Phase 5 (Strategy Base + Paper Execution)** — complete:
+
+- `BaseStrategy` lifecycle + typed `Signal`/Pydantic params; pure
+  indicator implementations (SMA, ATR)
+- Fully-implemented **MA Crossover** strategy with ATR-based stops
+- Signal → `PaperExecutor` pipeline; `StrategyRunner` (deterministic
+  replay + live polling) shared by paper/live paths
+- `strategies`/`strategy_runs`/`signals` tables + migration `0004`
+- Strategy CRUD/clone/start/stop API; runs execute in a **Celery
+  worker** with a Redis-backed stop control; new `worker` compose service
+- Frontend `/strategies` page (templates, create, start/stop) — paper-only
+
 ## Quick Start
 
 ```bash
