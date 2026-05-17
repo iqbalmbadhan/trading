@@ -3,3 +3,9 @@ node_modules/
 out/
 next-env.d.ts
 package-lock.json
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+public/workbox-*.js
+public/workbox-*.js.map
+public/fallback-*.js
