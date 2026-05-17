@@ -18,6 +18,7 @@ from app.api import (
     orders,
     portfolio,
     risk,
+    routing,
     strategies,
 )
 from app.core.config import get_settings
@@ -59,6 +60,7 @@ def create_app() -> FastAPI:
     app.include_router(portfolio.router)
     app.include_router(analytics.router)
     app.include_router(alerts.router)
+    app.include_router(routing.router)
     return app
 
 

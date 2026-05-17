@@ -138,6 +138,16 @@ Built in phases.
   trip emits an alert
 - Alerts API: CRUD, test send, delivery history; frontend `/alerts` page
 
+**Phase 12 (Smart Order Routing)** — complete:
+
+- Pure best-price split planner (`plan_route`): cheapest-ask-first for
+  buys, highest-bid-first for sells, per-venue liquidity caps, reports
+  unfilled remainder
+- `SmartOrderRouter`: quotes top-of-book across venue adapters and
+  executes child orders, aggregating fills into one synthetic result
+- API: `/api/v1/routing/quote` (across connected venues) and
+  `/execute` (paper-only); frontend `/routing` page
+
 ## Quick Start
 
 ```bash
