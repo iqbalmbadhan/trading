@@ -91,6 +91,20 @@ Built in phases.
 - Frontend `/orders` page (manual order, positions, orders table with
   slippage/fees, live-enable panel)
 
+**Phase 8 (Backtest Engine)** — complete:
+
+- Event-driven engine replays historical candles through the *unchanged*
+  strategy code (same path as paper/live) via a fill-simulating
+  `BacktestExchange` (fee + slippage, realized-PnL booking)
+- Metrics: total return, CAGR, Sharpe, Sortino, Calmar, max drawdown,
+  win rate, profit factor, avg win/loss, expectancy, exposure, turnover
+- Walk-forward optimization (in-sample grid → out-of-sample eval) and
+  Monte Carlo trade resampling (seeded, percentiles)
+- Artifacts: inline SVG equity curve, CSV trades, HTML report
+- `backtests` table + migration `0007`; Celery-run with status; API to
+  create/list/get/equity/report/trades.csv/cancel
+- Frontend `/backtest` page (create, list, metrics + Monte Carlo grids)
+
 ## Quick Start
 
 ```bash

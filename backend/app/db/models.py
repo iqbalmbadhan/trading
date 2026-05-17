@@ -231,3 +231,32 @@ class Position(Base):
     opened_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class Backtest(Base):
+    __tablename__ = "backtests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    strategy_id: Mapped[int | None] = mapped_column(
+        ForeignKey("strategies.id", ondelete="SET NULL"), nullable=True
+    )
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    params: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    symbol: Mapped[str] = mapped_column(String(64), nullable=False)
+    timeframe: Mapped[str] = mapped_column(String(8), nullable=False)
+    start_ts: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    end_ts: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    starting_cash: Mapped[float] = mapped_column(Float, default=10_000.0, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="queued", nullable=False)
+    error: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    monte_carlo: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    equity_curve: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    trade_pnls: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

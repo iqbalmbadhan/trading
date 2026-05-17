@@ -9,6 +9,7 @@ from app import __version__
 from app.api import (
     account,
     auth,
+    backtests,
     exchanges,
     health,
     markets,
@@ -51,6 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(risk.router)
     app.include_router(orders.router)
     app.include_router(account.router)
+    app.include_router(backtests.router)
     return app
 
 

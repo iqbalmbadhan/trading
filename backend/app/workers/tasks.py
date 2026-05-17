@@ -41,6 +41,22 @@ def run_strategy_run(run_id: int, data_exchange_id: str = "binance") -> None:
     asyncio.run(_run())
 
 
+@celery_app.task(name="backtests.run")
+def run_backtest_task(backtest_id: int) -> None:
+    async def _run() -> None:
+        settings = get_settings()
+        engine = create_async_engine(settings.database_url)
+        session_factory = async_sessionmaker(engine, expire_on_commit=False)
+        try:
+            from app.backtest.run import run_backtest
+
+            await run_backtest(session_factory, backtest_id)
+        finally:
+            await engine.dispose()
+
+    asyncio.run(_run())
+
+
 @celery_app.task(name="execution.liquidate_account")
 def liquidate_account_task(exchange_account_id: int, symbols: list[str]) -> None:
     """Cancel open orders and flatten positions for one live account."""
